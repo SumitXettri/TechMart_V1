@@ -1,33 +1,10 @@
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-white/10 bg-slate-900/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-tight text-white"
-          >
-            TechMart
-          </Link>
-
-          <nav className="flex items-center gap-3 text-sm text-slate-300">
-            <Link href="/" className="hover:text-white">
-              Home
-            </Link>
-            <Link href="/register" className="hover:text-white">
-              Register
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-full bg-white px-5 py-2 text-slate-950 font-semibold"
-            >
-              Sign in
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
         <section className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">

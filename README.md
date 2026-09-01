@@ -48,3 +48,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 
 4. Apply the database schema in `supabase/schema.sql` using the Supabase SQL editor or `supabase db push`.
 5. Use `lib/supabaseClient.ts` in your app to query Supabase from the frontend.
+
+## Payment Integration Setup
+
+This project includes a payment-ready checkout flow for eSewa, Khalti, and a manual demo mode.
+
+1. Copy `.env.example` to `.env.local` and fill in your real provider credentials.
+2. The checkout route is available at `/checkout`.
+3. Payment requests are handled through:
+   - `app/api/payments/checkout/route.ts`
+   - `app/api/payments/verify/route.ts`
+   - `lib/payments.ts`
+4. Update the gateway-specific payloads with your live merchant keys and callback URLs before production use.
+5. For sandbox testing, the manual mode works without credentials and redirects to the success page.

@@ -63,6 +63,10 @@ export default function Navbar() {
             Dashboard
           </Link>
 
+          <Link href="/checkout" className="hover:text-white">
+            Checkout
+          </Link>
+
           <Link href="/create-auction" className="hover:text-white">
             Create auction
           </Link>

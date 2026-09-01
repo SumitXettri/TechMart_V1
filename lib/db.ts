@@ -1,9 +1,20 @@
 import { Pool, PoolClient, QueryResultRow } from "pg";
 
-const connectionString =
-  process.env.NEXT_PUBLIC_DATABASE_URL || process.env.DATABASE_URL;
+const connectionString = (
+  process.env.NEXT_PUBLIC_DATABASE_URL ||
+  process.env.DATABASE_URL ||
+  ""
+).trim();
 
-export const pool = connectionString
+const hasPlaceholderValues = /\[(?:PROJECT_REF|PASSWORD|POOLER_HOST)\]/i.test(
+  connectionString,
+);
+const isValidConnectionString =
+  connectionString.length > 0 &&
+  !hasPlaceholderValues &&
+  /^postgres(?:ql)?:\/\//.test(connectionString);
+
+export const pool = isValidConnectionString
   ? new Pool({
       connectionString,
       max: 5,
@@ -12,9 +23,11 @@ export const pool = connectionString
 
 function ensurePool() {
   if (!pool) {
-    throw new Error(
-      "DATABASE_URL is not configured. Set it in your environment before using database queries.",
-    );
+    const message = connectionString
+      ? "The configured DATABASE_URL is invalid or still contains placeholder values. Replace it with a valid PostgreSQL connection string before using database queries."
+      : "DATABASE_URL is not configured. Set it in your environment before using database queries.";
+
+    throw new Error(message);
   }
 
   return pool;

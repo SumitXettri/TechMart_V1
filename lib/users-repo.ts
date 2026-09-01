@@ -46,47 +46,87 @@ export async function getDashboardStats() {
 
 export async function listUsers(params: ListParams) {
   const { page, pageSize, search, role, verified } = params;
-  const conditions: string[] = [];
-  const values: unknown[] = [];
 
-  if (search) {
-    values.push(`%${search}%`);
-    const idx = values.length;
-    conditions.push(
-      `(full_name ilike $${idx} or email ilike $${idx} or phone ilike $${idx})`,
+  try {
+    const conditions: string[] = [];
+    const values: unknown[] = [];
+
+    if (search) {
+      values.push(`%${search}%`);
+      const idx = values.length;
+      conditions.push(
+        `(full_name ilike $${idx} or email ilike $${idx} or phone ilike $${idx})`,
+      );
+    }
+    if (role) {
+      values.push(role);
+      conditions.push(`role = $${values.length}`);
+    }
+    if (verified === "verified") conditions.push(`email_verified = true`);
+    if (verified === "unverified") conditions.push(`email_verified = false`);
+
+    const whereClause = conditions.length
+      ? `where ${conditions.join(" and ")}`
+      : "";
+
+    const countResult = await query<{ count: string }>(
+      `select count(*)::text as count from public.users ${whereClause}`,
+      values,
     );
+    const total = Number(countResult.rows[0].count);
+
+    const limit = pageSize;
+    const offset = (page - 1) * pageSize;
+    values.push(limit, offset);
+
+    const dataResult = await query<AdminUser>(
+      `select ${SAFE_COLUMNS}
+         from public.users
+         ${whereClause}
+        order by created_at desc
+        limit $${values.length - 1} offset $${values.length}`,
+      values,
+    );
+
+    return { users: dataResult.rows, total, page, pageSize };
+  } catch {
+    const { data: users, error } = await supabaseAdmin
+      .from("users")
+      .select(
+        "id, email, phone, full_name, role, email_verified, created_at, updated_at",
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const filteredUsers = (users ?? []).filter((user) => {
+      const matchesSearch =
+        !search ||
+        [user.full_name, user.email, user.phone ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchesRole = !role || user.role === role;
+      const matchesVerified =
+        verified === "all" ||
+        (verified === "verified" && user.email_verified) ||
+        (verified === "unverified" && !user.email_verified);
+
+      return matchesSearch && matchesRole && matchesVerified;
+    });
+
+    const total = filteredUsers.length;
+    const start = (page - 1) * pageSize;
+    const pageUsers = filteredUsers.slice(start, start + pageSize);
+
+    return {
+      users: pageUsers as AdminUser[],
+      total,
+      page,
+      pageSize,
+    };
   }
-  if (role) {
-    values.push(role);
-    conditions.push(`role = $${values.length}`);
-  }
-  if (verified === "verified") conditions.push(`email_verified = true`);
-  if (verified === "unverified") conditions.push(`email_verified = false`);
-
-  const whereClause = conditions.length
-    ? `where ${conditions.join(" and ")}`
-    : "";
-
-  const countResult = await query<{ count: string }>(
-    `select count(*)::text as count from public.users ${whereClause}`,
-    values,
-  );
-  const total = Number(countResult.rows[0].count);
-
-  const limit = pageSize;
-  const offset = (page - 1) * pageSize;
-  values.push(limit, offset);
-
-  const dataResult = await query<AdminUser>(
-    `select ${SAFE_COLUMNS}
-       from public.users
-       ${whereClause}
-      order by created_at desc
-      limit $${values.length - 1} offset $${values.length}`,
-    values,
-  );
-
-  return { users: dataResult.rows, total, page, pageSize };
 }
 
 export async function getUserById(id: string) {

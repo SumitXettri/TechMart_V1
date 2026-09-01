@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { supabase } from "../../lib/supabaseClient";
@@ -52,7 +52,7 @@ function statusStyles(status: Auction["status"]) {
   }
 }
 
-export default function AuctionPage() {
+function AuctionPageContent() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(
     null,
@@ -376,5 +376,19 @@ export default function AuctionPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function AuctionPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-white p-10 text-center text-slate-300">
+          Loading auctions...
+        </div>
+      }
+    >
+      <AuctionPageContent />
+    </Suspense>
   );
 }

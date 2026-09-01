@@ -31,22 +31,76 @@ export default function RegisterForm() {
 
     setLoading(true);
 
+    console.log("[RegisterForm] Starting registration", {
+      email,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+    });
+
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      console.log("[RegisterForm] Calling supabase.auth.signUp");
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, phone } },
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            phone: phone.trim(),
+          },
+        },
       });
 
+      console.log("[RegisterForm] signUp response", { data, signUpError });
+
       if (signUpError) {
+        console.error("[RegisterForm] signUp error", signUpError);
         setError(signUpError.message);
-      } else {
-        router.push("/login");
+        return;
       }
+
+      const user = data?.user;
+
+      if (!user) {
+        console.error("[RegisterForm] No user returned from signUp", data);
+        setError("User registration succeeded but no user was returned.");
+        return;
+      }
+
+      const profilePayload = {
+        id: user.id,
+        email: user.email ?? email,
+        phone: phone.trim() || null,
+        full_name: fullName.trim(),
+        role: "CUSTOMER",
+        email_verified: Boolean(user.email_confirmed_at),
+      };
+
+      console.log("[RegisterForm] Inserting profile row", profilePayload);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("users")
+        .upsert(profilePayload, { onConflict: "id" })
+        .select();
+
+      console.log("[RegisterForm] profile insert response", {
+        profileData,
+        profileError,
+      });
+
+      if (profileError) {
+        console.error("[RegisterForm] profile insert error", profileError);
+        setError(profileError.message);
+        return;
+      }
+
+      console.log("[RegisterForm] Registration successful");
+      router.push("/login");
     } catch (err: any) {
+      console.error("[RegisterForm] unexpected registration error", err);
       setError(err?.message ?? String(err));
     } finally {
       setLoading(false);
+      console.log("[RegisterForm] Finished registration attempt");
     }
   };
 

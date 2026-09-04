@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { listProducts } from "@/lib/products-repo";
+import {
+  listCategories,
+  listProducts,
+  type ListProductsParams,
+} from "@/lib/products-repo";
 import ProductsTableClient from "@/components/ProductsTableClient";
 
 interface PageProps {
@@ -21,16 +25,26 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     redirect("/admin/login");
   }
   const sp = await searchParams;
+  const active = ["all", "active", "inactive"].includes(sp.active ?? "")
+    ? (sp.active as ListProductsParams["active"])
+    : undefined;
+  const sort = ["created_at", "name", "base_price"].includes(sp.sort ?? "")
+    ? (sp.sort as ListProductsParams["sort"])
+    : undefined;
+  const direction = ["asc", "desc"].includes(sp.direction ?? "")
+    ? (sp.direction as ListProductsParams["direction"])
+    : undefined;
 
   const result = await listProducts({
     page: sp.page ? Number(sp.page) : 1,
     pageSize: 20,
     search: sp.search,
     categoryId: sp.categoryId,
-    active: sp.active as any,
-    sort: sp.sort as any,
-    direction: sp.direction as any,
+    active,
+    sort,
+    direction,
   });
+  const categories = await listCategories();
 
-  return <ProductsTableClient initialResult={result} />;
+  return <ProductsTableClient initialResult={result} categories={categories} />;
 }

@@ -1,21 +1,63 @@
-import AdminLoginForm from "@/components/AdminLoginForm";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
-  return (
-    <div className="min-h-screen bg-slate-950 px-4 py-12 text-white flex items-center justify-center">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur-sm">
-        <div className="mb-6 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300">
-            TechMart Admin
-          </p>
-          <h1 className="mt-3 text-3xl font-bold text-white">Admin access</h1>
-          <p className="mt-2 text-sm text-slate-300">
-            Access the admin panel with your authorized credentials.
-          </p>
-        </div>
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-        <AdminLoginForm />
-      </div>
-    </div>
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Login failed.");
+        return;
+      }
+      router.push("/admin/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main>
+      <h1>Admin Login</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Email
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          Password
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
+        </button>
+      </form>
+    </main>
   );
 }

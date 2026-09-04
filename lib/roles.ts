@@ -1,27 +1,32 @@
-import { query } from "./db";
+import { query, isDatabaseConfigured } from "./db";
 
-let cachedRoles: string[] | null = null;
+/**
+ * lib/roles.ts
+ * Reads the `user_role` Postgres enum directly so role validation stays
+ * in sync with the database even if application code drifts.
+ */
+
+const FALLBACK_ROLES = ["CUSTOMER", "ADMIN", "SUPPORT"] as const;
 
 export async function getUserRoles(): Promise<string[]> {
-  if (cachedRoles) return cachedRoles;
-
-  const result = await query<{ enumlabel: string }>(`
-    select e.enumlabel as enumlabel
-    from pg_type t
-    join pg_enum e on t.oid = e.enumtypid
-    join pg_namespace n on n.oid = t.typnamespace
-    where n.nspname = 'public' and t.typname = 'user_role'
-    order by e.enumsortorder
-  `);
-
-  const roles = result.rows.map((row) => row.enumlabel);
-
-  if (!roles.length) {
-    throw new Error(
-      "Could not find the public.user_role enum in the database. Verify the enum exists before using role-based features.",
-    );
+  if (!isDatabaseConfigured()) {
+    return [...FALLBACK_ROLES];
   }
 
-  cachedRoles = roles;
-  return roles;
+  try {
+    const rows = await query<{ value: string }>(
+      `SELECT unnest(enum_range(NULL::user_role))::text AS value`,
+    );
+    if (rows.length === 0) return [...FALLBACK_ROLES];
+    return rows.map((r) => r.value);
+  } catch {
+    // If the enum introspection query fails for any reason, don't block
+    // admin operations — fall back to the known application-level roles.
+    return [...FALLBACK_ROLES];
+  }
+}
+
+export async function isValidRole(role: string): Promise<boolean> {
+  const roles = await getUserRoles();
+  return roles.includes(role);
 }

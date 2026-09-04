@@ -3,14 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { generateUniqueSlug, slugify } from "../lib/slug";
 
 export default function CreateAuctionForm() {
   const router = useRouter();
@@ -36,32 +29,6 @@ export default function CreateAuctionForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const generateUniqueSlug = async (baseSlug: string) => {
-    let candidate = baseSlug;
-    let attempt = 0;
-
-    while (attempt < 5) {
-      const { data: existing, error: lookupError } = await supabase
-        .from("products")
-        .select("id")
-        .eq("slug", candidate)
-        .maybeSingle();
-
-      if (lookupError) {
-        throw lookupError;
-      }
-
-      if (!existing) {
-        return candidate;
-      }
-
-      attempt += 1;
-      candidate = `${baseSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
-    }
-
-    return `${baseSlug}-${Date.now()}`;
-  };
 
   const resolveCategoryId = async (slug: string) => {
     const { data: existingCategory, error: lookupError } = await supabase
@@ -212,7 +179,18 @@ export default function CreateAuctionForm() {
       }
 
       const baseSlug = productSlug.trim() || slugify(productName);
-      const finalSlug = await generateUniqueSlug(baseSlug);
+      const finalSlug = await generateUniqueSlug(
+        baseSlug,
+        async (candidate) => {
+          const { data: existing, error: lookupError } = await supabase
+            .from("products")
+            .select("id")
+            .eq("slug", candidate)
+            .maybeSingle();
+          if (lookupError) throw lookupError;
+          return Boolean(existing);
+        },
+      );
       const productInsert = {
         name: productName.trim(),
         slug: finalSlug,

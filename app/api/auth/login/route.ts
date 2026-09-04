@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
   const { email, password } = parsed.data;
 
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Admin login is temporarily unavailable." },
+        { status: 503 },
+      );
+    }
     const { data: user, error } = await supabaseAdmin
       .from("users")
       .select("id, email, password_hash, role")

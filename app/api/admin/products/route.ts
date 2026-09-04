@@ -1,16 +1,30 @@
 import { z } from "zod";
 import { requireAdmin, AuthError } from "@/lib/auth";
 import { isSameOrigin, csrfRejectionResponse } from "@/lib/csrf";
-import { listUsers, createUser } from "@/lib/users-repo";
+import { listProducts, createProduct } from "@/lib/products-repo";
 
-const createUserSchema = z.object({
-  fullName: z.string().trim().min(1, "Full name is required."),
-  email: z.string().trim().email(),
-  phone: z.string().trim().optional(),
-  role: z.enum(["ADMIN", "CUSTOMER", "SUPPORT"]),
-  emailVerified: z.boolean().optional(),
-  password: z.string().min(6, "Password must be at least six characters."),
-});
+const createProductSchema = z
+  .object({
+    sku: z.string().trim().min(1),
+    name: z.string().trim().min(1),
+    slug: z.string().trim().optional(),
+    description: z.string().trim().min(1),
+    brand: z.string().trim().optional(),
+    categoryId: z.string().trim().optional(),
+    categoryName: z.string().trim().optional(),
+    basePrice: z
+      .string()
+      .regex(
+        /^\d+(\.\d{1,2})?$/,
+        "basePrice must be a decimal string, e.g. 1250.00",
+      ),
+    currency: z.string().trim().optional(),
+    isActive: z.boolean().optional(),
+  })
+  .refine((data) => data.categoryId || data.categoryName, {
+    message: "Either categoryId or categoryName is required.",
+    path: ["categoryId"],
+  });
 
 export async function GET(request: Request) {
   try {
@@ -27,18 +41,18 @@ export async function GET(request: Request) {
     page: Number(url.searchParams.get("page") ?? "1"),
     pageSize: Number(url.searchParams.get("pageSize") ?? "20"),
     search: url.searchParams.get("search") ?? undefined,
-    role: url.searchParams.get("role") ?? undefined,
-    verified: (url.searchParams.get("verified") as any) ?? undefined,
+    categoryId: url.searchParams.get("categoryId") ?? undefined,
+    active: (url.searchParams.get("active") as any) ?? undefined,
     sort: (url.searchParams.get("sort") as any) ?? undefined,
     direction: (url.searchParams.get("direction") as any) ?? undefined,
   };
 
   try {
-    const result = await listUsers(params);
+    const result = await listProducts(params);
     return Response.json(result);
   } catch (err: any) {
     return Response.json(
-      { error: err.message ?? "Failed to list users." },
+      { error: err.message ?? "Failed to list products." },
       { status: 500 },
     );
   }
@@ -65,7 +79,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const parsed = createUserSchema.safeParse(body);
+  const parsed = createProductSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid input." },
@@ -74,11 +88,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await createUser(parsed.data);
-    return Response.json(user, { status: 201 });
+    const product = await createProduct(parsed.data);
+    return Response.json(product, { status: 201 });
   } catch (err: any) {
     return Response.json(
-      { error: err.message ?? "Failed to create user." },
+      { error: err.message ?? "Failed to create product." },
       { status: 400 },
     );
   }

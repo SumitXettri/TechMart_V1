@@ -97,7 +97,8 @@ export function UserManagementTable({
     setErrorMessage(null);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!editingUser) return;
 
     setSaving(true);
@@ -169,7 +170,8 @@ export function UserManagementTable({
     }
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!creatingUser) return;
 
     setSaving(true);
@@ -311,7 +313,10 @@ export function UserManagementTable({
 
       {creatingUser ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+          <form
+            onSubmit={handleCreate}
+            className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+          >
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-slate-500">
@@ -336,6 +341,7 @@ export function UserManagementTable({
                   Full name
                 </span>
                 <input
+                  required
                   value={creatingUser.full_name}
                   onChange={(event) =>
                     setCreatingUser((current) =>
@@ -354,6 +360,7 @@ export function UserManagementTable({
                 </span>
                 <input
                   type="email"
+                  required
                   value={creatingUser.email}
                   onChange={(event) =>
                     setCreatingUser((current) =>
@@ -410,6 +417,8 @@ export function UserManagementTable({
                 </span>
                 <input
                   type="password"
+                  required
+                  minLength={6}
                   value={creatingUser.password}
                   onChange={(event) =>
                     setCreatingUser((current) =>
@@ -456,21 +465,23 @@ export function UserManagementTable({
                 Cancel
               </button>
               <button
-                type="button"
-                onClick={handleCreate}
+                type="submit"
                 disabled={saving}
                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
                 {saving ? "Creating..." : "Create user"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       ) : null}
 
       {editingUser ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+          <form
+            onSubmit={handleSave}
+            className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+          >
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-slate-500">
@@ -495,6 +506,7 @@ export function UserManagementTable({
                   Full name
                 </span>
                 <input
+                  required
                   value={editingUser.full_name}
                   onChange={(event) =>
                     setEditingUser((current) =>
@@ -513,6 +525,7 @@ export function UserManagementTable({
                 </span>
                 <input
                   type="email"
+                  required
                   value={editingUser.email}
                   onChange={(event) =>
                     setEditingUser((current) =>
@@ -597,15 +610,14 @@ export function UserManagementTable({
                 Cancel
               </button>
               <button
-                type="button"
-                onClick={handleSave}
+                type="submit"
                 disabled={saving}
                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
                 {saving ? "Saving..." : "Save changes"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       ) : null}
 

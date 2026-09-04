@@ -1,15 +1,29 @@
 import { z } from "zod";
 import { requireAdmin, AuthError } from "@/lib/auth";
 import { isSameOrigin, csrfRejectionResponse } from "@/lib/csrf";
-import { getUserById, updateUser, deleteUser } from "@/lib/users-repo";
+import {
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  ProductDependencyError,
+} from "@/lib/products-repo";
 
-const updateUserSchema = z.object({
-  fullName: z.string().trim().min(1).optional(),
-  email: z.string().trim().email().optional(),
-  phone: z.string().trim().optional(),
-  role: z.enum(["ADMIN", "CUSTOMER", "SUPPORT"]).optional(),
-  emailVerified: z.boolean().optional(),
-  password: z.string().min(6).optional(),
+const updateProductSchema = z.object({
+  sku: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).optional(),
+  slug: z.string().trim().min(1).optional(),
+  description: z.string().trim().min(1).optional(),
+  brand: z.string().trim().optional(),
+  categoryId: z.string().trim().optional(),
+  basePrice: z
+    .string()
+    .regex(
+      /^\d+(\.\d{1,2})?$/,
+      "basePrice must be a decimal string, e.g. 1250.00",
+    )
+    .optional(),
+  currency: z.string().trim().optional(),
+  isActive: z.boolean().optional(),
 });
 
 interface RouteContext {
@@ -27,17 +41,16 @@ export async function GET(_request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
-  const user = await getUserById(id);
-  if (!user) {
-    return Response.json({ error: "User not found." }, { status: 404 });
+  const product = await getProductById(id);
+  if (!product) {
+    return Response.json({ error: "Product not found." }, { status: 404 });
   }
-  return Response.json(user);
+  return Response.json(product);
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
-  let admin;
   try {
-    admin = await requireAdmin();
+    await requireAdmin();
   } catch (err) {
     if (err instanceof AuthError) {
       return Response.json({ error: err.message }, { status: err.status });
@@ -58,7 +71,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const parsed = updateUserSchema.safeParse(body);
+  const parsed = updateProductSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid input." },
@@ -67,20 +80,19 @@ export async function PUT(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const updated = await updateUser(id, parsed.data, admin.id);
+    const updated = await updateProduct(id, parsed.data);
     return Response.json(updated);
   } catch (err: any) {
     return Response.json(
-      { error: err.message ?? "Failed to update user." },
+      { error: err.message ?? "Failed to update product." },
       { status: 400 },
     );
   }
 }
 
 export async function DELETE(request: Request, { params }: RouteContext) {
-  let admin;
   try {
-    admin = await requireAdmin();
+    await requireAdmin();
   } catch (err) {
     if (err instanceof AuthError) {
       return Response.json({ error: err.message }, { status: err.status });
@@ -95,13 +107,15 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   const { id } = await params;
 
   try {
-    await deleteUser(id, admin.id);
+    await deleteProduct(id);
     return Response.json({ ok: true });
   } catch (err: any) {
-    const status = err?.code === "FK_CONFLICT" ? 409 : 400;
+    if (err instanceof ProductDependencyError) {
+      return Response.json({ error: err.message }, { status: 409 });
+    }
     return Response.json(
-      { error: err.message ?? "Failed to delete user." },
-      { status },
+      { error: err.message ?? "Failed to delete product." },
+      { status: 400 },
     );
   }
 }

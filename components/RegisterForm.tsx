@@ -109,7 +109,9 @@ export default function RegisterForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.45)]"
     >
-      <h2 className="mb-4 text-2xl font-black text-slate-950">Create account</h2>
+      <h2 className="mb-4 text-2xl font-black text-slate-950">
+        Create account
+      </h2>
 
       {message && <div className="mb-4 text-green-700">{message}</div>}
       {error && <div className="mb-4 text-red-700">{error}</div>}

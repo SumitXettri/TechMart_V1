@@ -56,41 +56,70 @@ export default function AdminLoginPage() {
                 Run the marketplace with clarity.
               </h2>
               <p className="mt-6 max-w-sm text-base leading-7 text-teal-50/75">
-                Manage products, auctions, customers, shipments, and activity reports from one focused workspace.
+                Manage products, auctions, customers, shipments, and activity
+                reports from one focused workspace.
               </p>
             </div>
           </div>
 
           <div className="relative grid max-w-md grid-cols-3 gap-3 border-t border-white/15 pt-6 text-sm">
-            <div><p className="font-bold text-amber-300">Catalog</p><p className="mt-1 text-teal-50/60">Products</p></div>
-            <div><p className="font-bold text-amber-300">Delivery</p><p className="mt-1 text-teal-50/60">Tracking</p></div>
-            <div><p className="font-bold text-amber-300">Reports</p><p className="mt-1 text-teal-50/60">Live data</p></div>
+            <div>
+              <p className="font-bold text-amber-300">Catalog</p>
+              <p className="mt-1 text-teal-50/60">Products</p>
+            </div>
+            <div>
+              <p className="font-bold text-amber-300">Delivery</p>
+              <p className="mt-1 text-teal-50/60">Tracking</p>
+            </div>
+            <div>
+              <p className="font-bold text-amber-300">Reports</p>
+              <p className="mt-1 text-teal-50/60">Live data</p>
+            </div>
           </div>
         </section>
 
         <section className="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-14 xl:px-24">
           <div className="w-full max-w-md">
             <div className="mb-10 flex items-center gap-3 lg:hidden">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400 font-black text-slate-950">T</span>
-              <span className="text-xl font-black">TechMart <span className="font-medium text-teal-700">Admin</span></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400 font-black text-slate-950">
+                T
+              </span>
+              <span className="text-xl font-black">
+                TechMart{" "}
+                <span className="font-medium text-teal-700">Admin</span>
+              </span>
             </div>
 
             <div className="mb-9">
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-teal-700">Admin portal</p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Welcome back.</h1>
-              <p className="mt-4 text-base leading-7 text-slate-500">Sign in to continue managing your TechMart operations.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-teal-700">
+                Admin portal
+              </p>
+              <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
+                Welcome back.
+              </h1>
+              <p className="mt-4 text-base leading-7 text-slate-500">
+                Sign in to continue managing your TechMart operations.
+              </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.45)] sm:p-8">
+            <form
+              onSubmit={handleSubmit}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.45)] sm:p-8"
+            >
               {error && (
-                <div role="alert" className="mb-6 flex gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+                <div
+                  role="alert"
+                  className="mb-6 flex gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700"
+                >
                   <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-rose-500" />
                   <span>{error}</span>
                 </div>
               )}
 
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">Admin email</span>
+                <span className="mb-2 block text-sm font-semibold text-slate-700">
+                  Admin email
+                </span>
                 <input
                   type="email"
                   value={email}
@@ -104,7 +133,9 @@ export default function AdminLoginPage() {
               </label>
 
               <label className="mt-5 block">
-                <span className="mb-2 block text-sm font-semibold text-slate-700">Password</span>
+                <span className="mb-2 block text-sm font-semibold text-slate-700">
+                  Password
+                </span>
                 <input
                   type="password"
                   value={password}
@@ -126,7 +157,9 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-xs leading-5 text-slate-400">Authorized TechMart administrators only.</p>
+            <p className="mt-6 text-center text-xs leading-5 text-slate-400">
+              Authorized TechMart administrators only.
+            </p>
           </div>
         </section>
       </div>

@@ -25,10 +25,21 @@ function isDeliveryStatus(value: unknown): value is DeliveryStatus {
 export async function GET() {
   try {
     await requireAdmin();
-    return NextResponse.json({ ok: true, deliveries: await getRecentDeliveries(50) });
+    return NextResponse.json({
+      ok: true,
+      deliveries: await getRecentDeliveries(50),
+    });
   } catch (error) {
-    const status = error instanceof Error && "status" in error ? Number(error.status) : 500;
-    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to load deliveries." }, { status });
+    const status =
+      error instanceof Error && "status" in error ? Number(error.status) : 500;
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error ? error.message : "Unable to load deliveries.",
+      },
+      { status },
+    );
   }
 }
 

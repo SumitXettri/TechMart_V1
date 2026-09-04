@@ -48,12 +48,24 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-700 bg-slate-950/95 backdrop-blur-xl">
       <div className="mx-auto flex min-h-[4.5rem] max-w-7xl flex-wrap items-center gap-4 px-5 py-3 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 text-xl font-black tracking-tight text-white" aria-label="TechMart home">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 text-sm text-slate-950" aria-hidden="true">T</span>
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5 text-xl font-black tracking-tight text-white"
+          aria-label="TechMart home"
+        >
+          <span
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 text-sm text-slate-950"
+            aria-hidden="true"
+          >
+            T
+          </span>
           TechMart
         </Link>
 
-        <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto text-sm font-medium text-slate-200 sm:order-2 sm:ml-auto sm:w-auto" aria-label="Main navigation">
+        <nav
+          className="order-3 flex w-full items-center gap-1 overflow-x-auto text-sm font-medium text-slate-200 sm:order-2 sm:ml-auto sm:w-auto"
+          aria-label="Main navigation"
+        >
           {[
             ["/", "Home"],
             ["/products", "Products"],
@@ -61,8 +73,18 @@ export default function Navbar() {
             ["/dashboard", "Dashboard"],
             ["/checkout", "Checkout"],
           ].map(([href, label]) => {
-            const active = pathname === href || (href !== "/" && pathname?.startsWith(`${href}/`));
-            return <Link key={href} href={href} className={`whitespace-nowrap rounded-lg px-3 py-2 transition ${active ? "bg-white/15 font-bold text-white" : "hover:bg-white/10 hover:text-white"}`}>{label}</Link>;
+            const active =
+              pathname === href ||
+              (href !== "/" && pathname?.startsWith(`${href}/`));
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`whitespace-nowrap rounded-lg px-3 py-2 transition ${active ? "bg-white/15 font-bold text-white" : "hover:bg-white/10 hover:text-white"}`}
+              >
+                {label}
+              </Link>
+            );
           })}
 
           <Link
@@ -76,7 +98,9 @@ export default function Navbar() {
             <span className="text-sm text-slate-300">Checking...</span>
           ) : user ? (
             <div className="flex items-center gap-3 sm:order-3">
-              <span className="hidden max-w-40 truncate text-sm text-slate-200 lg:block">{user.email}</span>
+              <span className="hidden max-w-40 truncate text-sm text-slate-200 lg:block">
+                {user.email}
+              </span>
               <button
                 onClick={handleSignOut}
                 className="rounded-full bg-white px-4 py-2 text-slate-950 font-semibold transition hover:bg-slate-200"

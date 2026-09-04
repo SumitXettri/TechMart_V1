@@ -89,12 +89,16 @@ export default function Dashboard() {
 
         <section className="mt-16 grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h2 className="text-xl font-black text-slate-950">Orders to ship</h2>
+            <h2 className="text-xl font-black text-slate-950">
+              Orders to ship
+            </h2>
             <ul className="mt-6 space-y-4 text-slate-600">
               <li className="rounded-2xl bg-[#f1f5f0] p-4">
                 <div className="flex items-center justify-between text-sm">
                   <span>Order #A0321</span>
-                  <span className="font-semibold text-amber-700">Preparing</span>
+                  <span className="font-semibold text-amber-700">
+                    Preparing
+                  </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-400">
                   Smartwatch M2 — Ship today
@@ -103,7 +107,9 @@ export default function Dashboard() {
               <li className="rounded-2xl bg-[#f1f5f0] p-4">
                 <div className="flex items-center justify-between text-sm">
                   <span>Order #A0318</span>
-                  <span className="font-semibold text-emerald-700">Confirmed</span>
+                  <span className="font-semibold text-emerald-700">
+                    Confirmed
+                  </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-400">
                   Wireless earbuds — Awaiting payment
@@ -143,7 +149,7 @@ export default function Dashboard() {
                 Track your latest order
               </h2>
             </div>
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
               Processing
             </span>
           </div>

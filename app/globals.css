@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+:root {
+  color: #17201b;
+  background: #f7f8f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  line-height: 1.55;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgb(45 212 191 / 45%);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #99f6e4;
+  color: #134e4a;
+}
+
 .admin-product-input {
   width: 100%;
   border: 1px solid #e2e8f0;
@@ -11,6 +41,46 @@
 }
 
 .admin-product-input:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgb(237 233 254);
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgb(204 251 241);
+}
+
+.store-page main .text-white {
+  color: #17201b;
+}
+
+.store-page main [class~="bg-white/5"] {
+  background-color: #ffffff;
+}
+
+.store-page main [class~="bg-slate-900/80"],
+.store-page main [class~="bg-slate-950/80"],
+.store-page main [class~="bg-slate-900/70"] {
+  background-color: #f1f5f0;
+}
+
+.store-page main [class~="border-white/10"] {
+  border-color: #e2e8e3;
+}
+
+.store-page main .text-slate-300 {
+  color: #64736b;
+}
+
+.store-page main .text-slate-400 {
+  color: #718078;
+}
+
+.store-page main .text-slate-500 {
+  color: #526158;
+}
+
+.store-page main .text-sky-300,
+.store-page main .text-sky-200 {
+  color: #0f766e;
+}
+
+.store-page main .text-emerald-300,
+.store-page main .text-emerald-200 {
+  color: #047857;
 }

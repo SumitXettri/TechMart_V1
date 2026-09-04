@@ -46,5 +46,20 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   });
   const categories = await listCategories();
 
-  return <ProductsTableClient initialResult={result} categories={categories} />;
+  const filterKey = [
+    sp.page ?? "1",
+    sp.search ?? "",
+    sp.categoryId ?? "",
+    sp.active ?? "all",
+    sp.sort ?? "created_at",
+    sp.direction ?? "desc",
+  ].join("|");
+
+  return (
+    <ProductsTableClient
+      key={filterKey}
+      initialResult={result}
+      categories={categories}
+    />
+  );
 }

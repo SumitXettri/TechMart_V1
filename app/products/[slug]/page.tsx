@@ -75,7 +75,7 @@ export default function ProductDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="store-page min-h-screen bg-[#f7f8f5] text-slate-950">
       <Navbar />
       <main className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
         {loading ? <p className="text-slate-300">Loading product...</p> : null}

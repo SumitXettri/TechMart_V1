@@ -184,7 +184,7 @@ export default function ProductsTableClient({
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">
             Catalog control
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
@@ -194,12 +194,20 @@ export default function ProductsTableClient({
             Keep your storefront assortment accurate and ready to sell.
           </p>
         </div>
-        <Link
-          href="/products"
-          className="inline-flex items-center justify-center rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-800"
-        >
-          View storefront
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/deliveries"
+            className="inline-flex items-center justify-center rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
+          >
+            Manage delivery
+          </Link>
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+          >
+            View storefront
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -316,7 +324,7 @@ export default function ProductsTableClient({
               Showing {result.products.length} of {result.total} products
             </p>
           </div>
-          <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
+          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
             Live catalog
           </span>
         </div>
@@ -605,6 +613,7 @@ export default function ProductsTableClient({
                   }
                   className="admin-product-input"
                 >
+                  <option value="NPR">NPR</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
                   <option value="GBP">GBP</option>

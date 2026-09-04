@@ -95,9 +95,9 @@ export default function RegisterForm() {
 
       console.log("[RegisterForm] Registration successful");
       router.push("/login");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[RegisterForm] unexpected registration error", err);
-      setError(err?.message ?? String(err));
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       console.log("[RegisterForm] Finished registration attempt");
@@ -107,9 +107,9 @@ export default function RegisterForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md bg-white p-8 rounded shadow"
+      className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.45)]"
     >
-      <h2 className="text-2xl font-semibold mb-4">Create account</h2>
+      <h2 className="mb-4 text-2xl font-black text-slate-950">Create account</h2>
 
       {message && <div className="mb-4 text-green-700">{message}</div>}
       {error && <div className="mb-4 text-red-700">{error}</div>}
@@ -117,7 +117,7 @@ export default function RegisterForm() {
       <label className="block mb-2">
         <span className="text-sm font-medium">Full name</span>
         <input
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           required
@@ -128,7 +128,7 @@ export default function RegisterForm() {
         <span className="text-sm font-medium">Email</span>
         <input
           type="email"
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -138,7 +138,7 @@ export default function RegisterForm() {
       <label className="block mb-2">
         <span className="text-sm font-medium">Phone (optional)</span>
         <input
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -148,7 +148,7 @@ export default function RegisterForm() {
         <span className="text-sm font-medium">Password</span>
         <input
           type="password"
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -158,7 +158,7 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-2 rounded disabled:opacity-60"
+        className="w-full rounded-xl bg-slate-950 py-3 font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
       >
         {loading ? "Creating..." : "Create account"}
       </button>

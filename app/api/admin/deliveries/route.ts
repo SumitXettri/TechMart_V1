@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getRecentDeliveries } from "@/lib/dashboard-repo";
 
 const DELIVERY_STATUSES = [
   "PENDING",
@@ -19,6 +20,16 @@ function isDeliveryStatus(value: unknown): value is DeliveryStatus {
     typeof value === "string" &&
     DELIVERY_STATUSES.includes(value as DeliveryStatus)
   );
+}
+
+export async function GET() {
+  try {
+    await requireAdmin();
+    return NextResponse.json({ ok: true, deliveries: await getRecentDeliveries(50) });
+  } catch (error) {
+    const status = error instanceof Error && "status" in error ? Number(error.status) : 500;
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unable to load deliveries." }, { status });
+  }
 }
 
 export async function POST(request: NextRequest) {

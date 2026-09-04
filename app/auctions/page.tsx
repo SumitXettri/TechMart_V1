@@ -195,7 +195,7 @@ function AuctionPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="store-page min-h-screen bg-[#f7f8f5] text-slate-950">
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
@@ -383,7 +383,7 @@ export default function AuctionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 text-white p-10 text-center text-slate-300">
+        <div className="store-page min-h-screen bg-[#f7f8f5] p-10 text-center text-slate-600">
           Loading auctions...
         </div>
       }

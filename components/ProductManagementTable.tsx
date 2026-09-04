@@ -174,7 +174,7 @@ export function ProductManagementTable({ products, categories, total }: Props) {
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white text-sm text-slate-700">
+            <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
               {products.length === 0 ? (
                 <tr>
                   <td

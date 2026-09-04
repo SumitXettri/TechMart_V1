@@ -32,8 +32,8 @@ export default function LoginForm() {
         setMessage("Sign in successful! Redirecting...");
         setTimeout(() => router.push("/dashboard"), 1500);
       }
-    } catch (err: any) {
-      setError(err?.message ?? String(err));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -42,9 +42,9 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md bg-white p-8 rounded shadow"
+      className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-35px_rgba(15,23,42,0.45)]"
     >
-      <h2 className="text-2xl font-semibold mb-4">Sign in</h2>
+      <h2 className="mb-4 text-2xl font-black text-slate-950">Sign in</h2>
 
       {message && <div className="mb-4 text-green-700">{message}</div>}
       {error && <div className="mb-4 text-red-700">{error}</div>}
@@ -53,7 +53,7 @@ export default function LoginForm() {
         <span className="text-sm font-medium">Email</span>
         <input
           type="email"
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -64,7 +64,7 @@ export default function LoginForm() {
         <span className="text-sm font-medium">Password</span>
         <input
           type="password"
-          className="mt-1 block w-full rounded border px-3 py-2"
+          className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -74,14 +74,14 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-2 rounded disabled:opacity-60 mb-3"
+        className="mb-3 w-full rounded-xl bg-slate-950 py-3 font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>
 
       <p className="text-sm text-center text-zinc-600">
-        Don't have an account?{" "}
-        <Link href="/register" className="font-medium underline">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="font-semibold text-teal-700 underline">
           Create one
         </Link>
       </p>

@@ -61,3 +61,18 @@ This project includes a payment-ready checkout flow for eSewa, Khalti, and a man
    - `lib/payments.ts`
 4. Update the gateway-specific payloads with your live merchant keys and callback URLs before production use.
 5. For sandbox testing, the manual mode works without credentials and redirects to the success page.
+
+## Recent Development
+
+- Added a responsive admin login experience with protected admin route-group handling. Unauthenticated users are redirected to `/admin/login`, while the login page remains public.
+- Added shared admin navigation for the dashboard, users, and product management pages.
+- Added product catalog search, category filtering, maximum-price filtering, product detail pages, and variant/property selection with stock-aware pricing.
+- Added checkout shipping details including address, city, district, and postal code.
+- Added delivery tracking with shipment statuses, carriers, tracking numbers, estimated delivery dates, locations, and delivery event history.
+- Added admin delivery operations reporting with shipment status counts and recent tracking records.
+- Added monthly and annual admin activity reports covering products, users, orders, and auctions.
+- Added the admin delivery API at `/api/admin/deliveries` for creating shipments and updating shipment status.
+
+### Delivery Database Setup
+
+Apply the latest `supabase/schema.sql` to create the `delivery_shipments` and `delivery_events` tables. The admin delivery API requires an authenticated admin session and the server Supabase credentials.

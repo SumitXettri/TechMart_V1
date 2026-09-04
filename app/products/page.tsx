@@ -163,7 +163,7 @@ export default function ProductsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="store-page min-h-screen bg-[#f7f8f5] text-slate-950">
       <Navbar />
       <main className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -227,7 +227,7 @@ export default function ProductsPage() {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Name or brand"
-                  className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
+                  className="w-full rounded-xl border border-white/10 bg-slate-50 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
                 />
               </label>
               <label className="block">
@@ -237,7 +237,7 @@ export default function ProductsPage() {
                 <select
                   value={categoryFilter}
                   onChange={(event) => setCategoryFilter(event.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
+                  className="w-full rounded-xl border border-white/10 bg-slate-50 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
                 >
                   <option value="all">All categories</option>
                   {categories.map((category) => (
@@ -257,7 +257,7 @@ export default function ProductsPage() {
                   value={maxPrice}
                   onChange={(event) => setMaxPrice(event.target.value)}
                   placeholder="Any price"
-                  className="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
+                  className="w-full rounded-xl border border-white/10 bg-slate-50 px-4 py-3 text-sm text-white focus:border-sky-400"
                 />
               </label>
             </div>

@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/deliveries", label: "Delivery" },
 ];
 
 export default function AdminHeader({ adminEmail }: { adminEmail: string }) {
@@ -41,6 +42,12 @@ export default function AdminHeader({ adminEmail }: { adminEmail: string }) {
           className="ml-auto flex items-center gap-1 overflow-x-auto text-sm"
           aria-label="Admin navigation"
         >
+          <Link
+            href="/"
+            className="mr-1 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800"
+          >
+            Home
+          </Link>
           {NAV_ITEMS.map((item) => {
             const active =
               pathname === item.href || pathname?.startsWith(`${item.href}/`);

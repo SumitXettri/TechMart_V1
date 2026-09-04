@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+
 type PaymentResultPageProps = {
   searchParams: Promise<{
     provider?: string;
@@ -20,8 +22,10 @@ export default async function PaymentResultPage({
   const demo = params.demo === "1";
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6 py-16">
-      <section className="w-full rounded-4xl border border-emerald-500/20 bg-emerald-500/10 p-8 text-center shadow-xl shadow-emerald-900/10">
+    <div className="store-page min-h-screen bg-[#f7f8f5] text-slate-950">
+      <Navbar />
+      <main className="mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-3xl items-center justify-center px-6 py-16">
+        <section className="w-full rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-sm">
         <p className="text-sm uppercase tracking-[0.28em] text-emerald-300">
           Payment status
         </p>
@@ -51,6 +55,7 @@ export default async function PaymentResultPage({
           </p>
         </div>
       </section>
-    </main>
+      </main>
+    </div>
   );
 }

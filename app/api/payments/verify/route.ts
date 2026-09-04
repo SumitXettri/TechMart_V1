@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
       status?: string;
       oid?: string;
       amt?: string;
+      amount?: string | number;
       refId?: string;
       rid?: string;
     };

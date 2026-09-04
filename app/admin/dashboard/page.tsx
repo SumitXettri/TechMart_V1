@@ -7,19 +7,22 @@ import {
   getRecentProducts,
   getRecentAuctions,
   getMonthlyProductActivity,
+  getDeliverySummary,
+  getRecentDeliveries,
+  getActivityReport,
 } from "@/lib/dashboard-repo";
 
 const COLORS = {
-  page: "#f7f5ff",
+  page: "#f6f8f5",
   card: "#ffffff",
-  border: "#ebe7f5",
+  border: "#e3e9e4",
 
-  text: "#171329",
-  muted: "#7c748f",
+  text: "#17201b",
+  muted: "#718078",
 
-  purple: "#7c3aed",
-  purpleDark: "#5b21b6",
-  purpleSoft: "#ede9fe",
+  purple: "#0f766e",
+  purpleDark: "#115e59",
+  purpleSoft: "#e5f3ef",
 
   green: "#10b981",
   greenSoft: "#ecfdf5",
@@ -150,7 +153,7 @@ function StatCard({
     purple: {
       iconBg: COLORS.purpleSoft,
       iconColor: COLORS.purple,
-      glow: "group-hover:shadow-violet-100",
+      glow: "group-hover:shadow-teal-100",
     },
     green: {
       iconBg: COLORS.greenSoft,
@@ -265,17 +268,17 @@ function MonthlyActivity({
             >
               <div className="relative flex flex-1 items-end justify-center">
                 <div
-                  className="absolute bottom-0 w-full rounded-t-xl bg-violet-100 transition-all duration-300 group-hover:bg-violet-200"
+                  className="absolute bottom-0 w-full rounded-t-xl bg-teal-50 transition-all duration-300 group-hover:bg-teal-100"
                   style={{
                     height: `${percentage}%`,
                   }}
                 />
 
                 <div
-                  className="relative z-10 w-full max-w-9 rounded-t-xl transition-all duration-300 group-hover:from-violet-500 group-hover:to-indigo-600"
+                  className="relative z-10 w-full max-w-9 rounded-t-xl transition-all duration-300"
                   style={{
                     height: `${percentage}%`,
-                    background: "linear-gradient(to top, #7c3aed, #8b5cf6)",
+                    background: "linear-gradient(to top, #0f766e, #2a9d8f)",
                   }}
                 />
 
@@ -295,6 +298,87 @@ function MonthlyActivity({
         })}
       </div>
     </div>
+  );
+}
+
+function ActivityReport({
+  title,
+  data,
+}: {
+  title: string;
+  data: {
+    period: string;
+    products: number;
+    users: number;
+    orders: number;
+    auctions: number;
+  }[];
+}) {
+  const max = Math.max(
+    1,
+    ...data.flatMap((item) => [
+      item.products,
+      item.users,
+      item.orders,
+      item.auctions,
+    ]),
+  );
+  return (
+    <section
+      className="rounded-xl border bg-white p-6 shadow-sm"
+      style={{ borderColor: COLORS.border }}
+    >
+      <SectionHeader
+        title={title}
+        subtitle="Products, users, orders, and auctions"
+      />
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div key={item.period}>
+            <div className="mb-2 flex items-center justify-between text-xs font-semibold">
+              <span>{item.period}</span>
+              <span style={{ color: COLORS.muted }}>
+                {item.products + item.users + item.orders + item.auctions}{" "}
+                events
+              </span>
+            </div>
+            <div className="grid gap-1.5 sm:grid-cols-4">
+              {(
+                [
+                  ["Products", item.products, "bg-teal-600"],
+                  ["Users", item.users, "bg-emerald-500"],
+                  ["Orders", item.orders, "bg-amber-500"],
+                  ["Auctions", item.auctions, "bg-slate-500"],
+                ] as const
+              ).map(([label, value, color]) => (
+                <div key={label} className="min-w-0">
+                  <div
+                    className="mb-1 flex justify-between text-[10px]"
+                    style={{ color: COLORS.muted }}
+                  >
+                    <span>{label}</span>
+                    <span>{value}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-100">
+                    <div
+                      className={`h-2 rounded-full ${color}`}
+                      style={{
+                        width: `${Math.max(value ? 8 : 0, Math.round((value / max) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        {data.length === 0 ? (
+          <p className="text-sm" style={{ color: COLORS.muted }}>
+            No activity data is available yet.
+          </p>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -338,6 +422,9 @@ export default async function AdminDashboardPage() {
     recentProducts,
     recentAuctions,
     monthly,
+    deliverySummary,
+    recentDeliveries,
+    activityReport,
   ] = await Promise.all([
     getDashboardStats(),
     getProductStats(),
@@ -351,6 +438,9 @@ export default async function AdminDashboardPage() {
     getRecentProducts(5),
     getRecentAuctions(5),
     getMonthlyProductActivity(6),
+    getDeliverySummary(),
+    getRecentDeliveries(6),
+    getActivityReport(3),
   ]);
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -362,7 +452,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="min-h-screen" style={{ color: COLORS.text }}>
       {/* Page header */}
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-8 flex flex-col gap-5 border-b border-slate-200 pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-3 flex items-center gap-2">
             <span
@@ -378,7 +468,7 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
             Admin Dashboard
           </h1>
 
@@ -411,7 +501,7 @@ export default async function AdminDashboardPage() {
           accent="purple"
           detail={
             <>
-              <span className="font-semibold text-violet-600">
+              <span className="font-semibold text-teal-700">
                 {userStats.verifiedCount}
               </span>{" "}
               verified ·{" "}
@@ -471,7 +561,7 @@ export default async function AdminDashboardPage() {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         {/* Activity chart */}
         <section
-          className="rounded-2xl border bg-white p-6 shadow-sm"
+          className="rounded-xl border bg-white p-6 shadow-sm"
           style={{ borderColor: COLORS.border }}
         >
           <div className="flex items-start justify-between">
@@ -494,16 +584,16 @@ export default async function AdminDashboardPage() {
           </div>
 
           <MonthlyActivity
-            data={monthly.map((item: any) => ({
+            data={monthly.map((item) => ({
               month: item.month,
-              count: item.count,
+              count: Number(item.count),
             }))}
           />
         </section>
 
         {/* Auction overview */}
         <section
-          className="rounded-2xl border bg-white p-6 shadow-sm"
+          className="rounded-xl border bg-white p-6 shadow-sm"
           style={{ borderColor: COLORS.border }}
         >
           <SectionHeader
@@ -556,11 +646,117 @@ export default async function AdminDashboardPage() {
         </section>
       </div>
 
+      {/* Delivery operations */}
+      <section
+        className="mt-6 overflow-hidden rounded-xl border bg-white shadow-sm"
+        style={{ borderColor: COLORS.border }}
+      >
+        <div
+          className="border-b px-6 py-5"
+          style={{ borderColor: COLORS.border }}
+        >
+          <SectionHeader
+            title="Delivery operations"
+            subtitle="Shipment status and tracking overview"
+          />
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              [
+                "Pending",
+                deliverySummary.pending,
+                "text-slate-600",
+                "bg-slate-100",
+              ],
+              [
+                "Processing",
+                deliverySummary.processing,
+                "text-amber-700",
+                "bg-amber-50",
+              ],
+              [
+                "Shipped",
+                deliverySummary.shipped,
+                "text-teal-700",
+                "bg-teal-50",
+              ],
+              [
+                "In transit",
+                deliverySummary.inTransit,
+                "text-sky-700",
+                "bg-sky-50",
+              ],
+              [
+                "Delivered",
+                deliverySummary.delivered,
+                "text-emerald-700",
+                "bg-emerald-50",
+              ],
+              [
+                "Exceptions",
+                deliverySummary.exception,
+                "text-rose-700",
+                "bg-rose-50",
+              ],
+            ].map(([label, value, text, background]) => (
+              <div key={label} className={`rounded-lg p-3 ${background}`}>
+                <p className={`text-xs font-semibold ${text}`}>{label}</p>
+                <p className={`mt-1 text-xl font-black ${text}`}>{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="divide-y" style={{ borderColor: COLORS.border }}>
+          {recentDeliveries.length === 0 ? (
+            <p className="px-6 py-5 text-sm" style={{ color: COLORS.muted }}>
+              No shipment records yet. Create a delivery shipment when an order
+              is ready to dispatch.
+            </p>
+          ) : (
+            recentDeliveries.map((delivery) => (
+              <div
+                key={delivery.id}
+                className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="text-sm font-bold">
+                    {delivery.order_number || "Unnumbered order"}
+                  </p>
+                  <p className="mt-1 text-xs" style={{ color: COLORS.muted }}>
+                    {delivery.carrier ?? "Carrier not assigned"} ·{" "}
+                    {delivery.tracking_number ?? "Tracking pending"}
+                  </p>
+                </div>
+                <div className="text-left sm:text-right">
+                  <StatusBadge status={delivery.status} />
+                  <p className="mt-1 text-xs" style={{ color: COLORS.muted }}>
+                    {delivery.last_location ?? "Location pending"}
+                    {delivery.estimated_delivery
+                      ? ` · ETA ${delivery.estimated_delivery}`
+                      : ""}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <ActivityReport
+          title="Monthly activity report"
+          data={activityReport.monthly}
+        />
+        <ActivityReport
+          title="Annual activity report"
+          data={activityReport.annual}
+        />
+      </div>
+
       {/* Recent data */}
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         {/* Recent users */}
         <section
-          className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+          className="overflow-hidden rounded-xl border bg-white shadow-sm"
           style={{ borderColor: COLORS.border }}
         >
           <div
@@ -576,7 +772,7 @@ export default async function AdminDashboardPage() {
 
             <a
               href="/admin/users"
-              className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-700"
+              className="flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800"
             >
               View all
               <Icon name="arrow" className="h-3.5 w-3.5" />
@@ -587,11 +783,11 @@ export default async function AdminDashboardPage() {
             {recentUsers.users.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-violet-50/40"
+                className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-teal-50/40"
                 style={{ borderColor: COLORS.border }}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-800">
                     {user.fullName
                       .split(" ")
                       .map((part) => part[0])
@@ -624,7 +820,7 @@ export default async function AdminDashboardPage() {
 
         {/* Recent products */}
         <section
-          className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+          className="overflow-hidden rounded-xl border bg-white shadow-sm"
           style={{ borderColor: COLORS.border }}
         >
           <div
@@ -640,7 +836,7 @@ export default async function AdminDashboardPage() {
 
             <a
               href="/admin/products"
-              className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-700"
+              className="flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800"
             >
               View all
               <Icon name="arrow" className="h-3.5 w-3.5" />
@@ -648,27 +844,27 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div>
-            {recentProducts.map((product: any) => (
+            {recentProducts.map((product) => (
               <div
-                key={product.id}
-                className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-violet-50/40"
+                key={String(product.id)}
+                className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-teal-50/40"
                 style={{ borderColor: COLORS.border }}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
                     <Icon name="box" className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">
-                      {product.name}
+                      {String(product.name)}
                     </p>
 
                     <p
                       className="truncate text-xs"
                       style={{ color: COLORS.muted }}
                     >
-                      {product.sku}
+                      {String(product.sku)}
                     </p>
                   </div>
                 </div>
@@ -689,7 +885,7 @@ export default async function AdminDashboardPage() {
 
       {/* Recent auctions */}
       <section
-        className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-sm"
+        className="mt-6 overflow-hidden rounded-xl border bg-white shadow-sm"
         style={{ borderColor: COLORS.border }}
       >
         <div
@@ -705,7 +901,7 @@ export default async function AdminDashboardPage() {
 
           <button
             type="button"
-            className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-violet-700"
+            className="flex items-center gap-1.5 rounded-lg bg-teal-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-teal-800"
           >
             <Icon name="plus" className="h-3.5 w-3.5" />
             New auction
@@ -713,15 +909,15 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2">
-          {recentAuctions.map((auction: any) => (
+          {recentAuctions.map((auction) => (
             <div
-              key={auction.id}
-              className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-violet-50/40 md:even:border-l"
+              key={String(auction.id)}
+              className="flex items-center justify-between gap-4 border-b px-6 py-4 last:border-b-0 hover:bg-teal-50/40 md:even:border-l"
               style={{ borderColor: COLORS.border }}
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">
-                  {auction.product_name}
+                  {String(auction.product_name)}
                 </p>
 
                 <p className="mt-1 text-xs" style={{ color: COLORS.muted }}>
@@ -729,7 +925,7 @@ export default async function AdminDashboardPage() {
                 </p>
               </div>
 
-              <StatusBadge status={auction.status} />
+              <StatusBadge status={String(auction.status)} />
             </div>
           ))}
         </div>

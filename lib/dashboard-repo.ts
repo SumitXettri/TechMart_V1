@@ -191,3 +191,213 @@ export async function getMonthlyProductActivity(months = 6) {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, count]) => ({ month, count: String(count) }));
 }
+
+export type DeliverySummary = {
+  pending: number;
+  processing: number;
+  shipped: number;
+  inTransit: number;
+  outForDelivery: number;
+  delivered: number;
+  exception: number;
+};
+
+export type DeliveryRow = {
+  id: string;
+  order_number: string;
+  status: string;
+  carrier: string | null;
+  tracking_number: string | null;
+  estimated_delivery: string | null;
+  last_location: string | null;
+};
+
+export type ActivityPeriod = {
+  period: string;
+  products: number;
+  users: number;
+  orders: number;
+  auctions: number;
+};
+
+export async function getDeliverySummary(): Promise<DeliverySummary> {
+  const empty: DeliverySummary = {
+    pending: 0,
+    processing: 0,
+    shipped: 0,
+    inTransit: 0,
+    outForDelivery: 0,
+    delivered: 0,
+    exception: 0,
+  };
+  if (isDatabaseConfigured()) {
+    try {
+      const rows = await query<{ status: string; count: string }>(
+        `SELECT status::text, COUNT(*)::text AS count
+         FROM delivery_shipments GROUP BY status`,
+      );
+      for (const row of rows) {
+        const key = row.status
+          .toLowerCase()
+          .replace(/_([a-z])/g, (_, letter: string) =>
+            letter.toUpperCase(),
+          ) as keyof DeliverySummary;
+        if (key in empty) empty[key] = Number(row.count);
+      }
+      return empty;
+    } catch {
+      // Fall back to Supabase when the SQL database is unavailable or unmigrated.
+    }
+  }
+  if (!supabaseAdmin) return empty;
+  const { data } = await supabaseAdmin
+    .from("delivery_shipments")
+    .select("status");
+  for (const row of data ?? []) {
+    const key = String(row.status)
+      .toLowerCase()
+      .replace(/_([a-z])/g, (_, letter: string) =>
+        letter.toUpperCase(),
+      ) as keyof DeliverySummary;
+    if (key in empty) empty[key] += 1;
+  }
+  return empty;
+}
+
+export async function getRecentDeliveries(limit = 6): Promise<DeliveryRow[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      return await query<DeliveryRow>(
+        `SELECT d.id, o.order_number, d.status::text, d.carrier,
+                d.tracking_number, d.estimated_delivery, d.last_location
+         FROM delivery_shipments d JOIN orders o ON o.id = d.order_id
+         ORDER BY d.updated_at DESC LIMIT $1`,
+        [limit],
+      );
+    } catch {
+      // Fall back to Supabase when the SQL database is unavailable or unmigrated.
+    }
+  }
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin
+    .from("delivery_shipments")
+    .select(
+      "id,status,carrier,tracking_number,estimated_delivery,last_location,orders(order_number)",
+    )
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((row) => {
+    const order = row.orders as
+      | { order_number?: string }
+      | { order_number?: string }[]
+      | null;
+    return {
+      id: String(row.id),
+      order_number: Array.isArray(order)
+        ? String(order[0]?.order_number ?? "")
+        : String(order?.order_number ?? ""),
+      status: String(row.status),
+      carrier: row.carrier ? String(row.carrier) : null,
+      tracking_number: row.tracking_number ? String(row.tracking_number) : null,
+      estimated_delivery: row.estimated_delivery
+        ? String(row.estimated_delivery)
+        : null,
+      last_location: row.last_location ? String(row.last_location) : null,
+    };
+  });
+}
+
+export async function getActivityReport(
+  years = 3,
+): Promise<{ monthly: ActivityPeriod[]; annual: ActivityPeriod[] }> {
+  if (isDatabaseConfigured()) {
+    try {
+      const [monthly, annual] = await Promise.all([
+        query<ActivityPeriod>(
+          `WITH periods AS (SELECT to_char(date_trunc('month', now()) - (n || ' months')::interval, 'YYYY-MM') period FROM generate_series(0, 11) n)
+           SELECT p.period, COUNT(DISTINCT pr.id)::int products, COUNT(DISTINCT u.id)::int users,
+                  COUNT(DISTINCT o.id)::int orders, COUNT(DISTINCT a.id)::int auctions
+           FROM periods p LEFT JOIN products pr ON to_char(pr.created_at, 'YYYY-MM') = p.period
+           LEFT JOIN users u ON to_char(u.created_at, 'YYYY-MM') = p.period
+           LEFT JOIN orders o ON to_char(o.created_at, 'YYYY-MM') = p.period
+           LEFT JOIN auctions a ON to_char(a.starts_at, 'YYYY-MM') = p.period
+           GROUP BY p.period ORDER BY p.period`,
+        ),
+        query<ActivityPeriod>(
+          `WITH periods AS (SELECT EXTRACT(YEAR FROM now())::int - n AS period FROM generate_series(0, $1 - 1) n)
+           SELECT p.period::text, COUNT(DISTINCT pr.id)::int products, COUNT(DISTINCT u.id)::int users,
+                  COUNT(DISTINCT o.id)::int orders, COUNT(DISTINCT a.id)::int auctions
+           FROM periods p LEFT JOIN products pr ON EXTRACT(YEAR FROM pr.created_at) = p.period
+           LEFT JOIN users u ON EXTRACT(YEAR FROM u.created_at) = p.period
+           LEFT JOIN orders o ON EXTRACT(YEAR FROM o.created_at) = p.period
+           LEFT JOIN auctions a ON EXTRACT(YEAR FROM a.starts_at) = p.period
+           GROUP BY p.period ORDER BY p.period`,
+          [years],
+        ),
+      ]);
+      return { monthly, annual };
+    } catch {
+      // Fall back to Supabase bucketing below.
+    }
+  }
+  if (!supabaseAdmin) return { monthly: [], annual: [] };
+  const [products, users, orders, auctions] = await Promise.all([
+    supabaseAdmin.from("products").select("created_at"),
+    supabaseAdmin.from("users").select("created_at"),
+    supabaseAdmin.from("orders").select("created_at"),
+    supabaseAdmin.from("auctions").select("starts_at"),
+  ]);
+  const monthlyMap = new Map<string, ActivityPeriod>();
+  const annualMap = new Map<string, ActivityPeriod>();
+  const now = new Date();
+  for (let offset = 0; offset < 12; offset += 1) {
+    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    monthlyMap.set(period, {
+      period,
+      products: 0,
+      users: 0,
+      orders: 0,
+      auctions: 0,
+    });
+  }
+  for (let offset = 0; offset < years; offset += 1) {
+    const period = String(now.getFullYear() - offset);
+    annualMap.set(period, {
+      period,
+      products: 0,
+      users: 0,
+      orders: 0,
+      auctions: 0,
+    });
+  }
+  const addRows = (
+    rows: unknown[] | null | undefined,
+    field: keyof Omit<ActivityPeriod, "period">,
+  ) => {
+    for (const row of rows ?? []) {
+      const value = row as Record<string, unknown>;
+      const dateValue = String(value.created_at ?? value.starts_at ?? "");
+      const date = new Date(dateValue);
+      if (Number.isNaN(date.getTime())) continue;
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const year = String(date.getFullYear());
+      const monthlyItem = monthlyMap.get(month);
+      const annualItem = annualMap.get(year);
+      if (monthlyItem) monthlyItem[field] += 1;
+      if (annualItem) annualItem[field] += 1;
+    }
+  };
+  addRows(products.data, "products");
+  addRows(users.data, "users");
+  addRows(orders.data, "orders");
+  addRows(auctions.data, "auctions");
+  return {
+    monthly: Array.from(monthlyMap.values()).sort((a, b) =>
+      a.period.localeCompare(b.period),
+    ),
+    annual: Array.from(annualMap.values()).sort((a, b) =>
+      a.period.localeCompare(b.period),
+    ),
+  };
+}

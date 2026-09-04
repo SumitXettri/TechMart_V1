@@ -13,6 +13,11 @@ export default function CheckoutPage() {
   const [customerName, setCustomerName] = useState("Customer");
   const [customerEmail, setCustomerEmail] = useState("customer@example.com");
   const [customerPhone, setCustomerPhone] = useState("9800000000");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [deliveryStatus, setDeliveryStatus] = useState("pending");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +39,7 @@ export default function CheckoutPage() {
           customerName,
           customerEmail,
           customerPhone,
+          shippingAddress: { address, city, district, postalCode },
         }),
       });
 
@@ -62,6 +68,7 @@ export default function CheckoutPage() {
       }
 
       setMessage("Checkout created successfully.");
+      setDeliveryStatus("processing");
       window.location.href = payload.redirectUrl;
     } catch (submitError) {
       setError(
@@ -174,6 +181,58 @@ export default function CheckoutPage() {
                   className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none focus:border-sky-400"
                 />
               </label>
+
+              <div className="md:col-span-2">
+                <p className="mb-3 text-sm font-semibold text-white">
+                  Shipping details
+                </p>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <label className="block md:col-span-2">
+                    <span className="mb-2 block text-sm text-slate-300">
+                      Street address
+                    </span>
+                    <input
+                      value={address}
+                      onChange={(event) => setAddress(event.target.value)}
+                      required
+                      placeholder="House number, street, landmark"
+                      className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none focus:border-sky-400"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-slate-300">
+                      City
+                    </span>
+                    <input
+                      value={city}
+                      onChange={(event) => setCity(event.target.value)}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none focus:border-sky-400"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-slate-300">
+                      District
+                    </span>
+                    <input
+                      value={district}
+                      onChange={(event) => setDistrict(event.target.value)}
+                      required
+                      className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none focus:border-sky-400"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-slate-300">
+                      Postal code
+                    </span>
+                    <input
+                      value={postalCode}
+                      onChange={(event) => setPostalCode(event.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none focus:border-sky-400"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
 
             {message && (
@@ -198,6 +257,37 @@ export default function CheckoutPage() {
           </form>
 
           <aside className="space-y-6">
+            <div className="rounded-4xl border border-white/10 bg-white/5 p-8 shadow-xl shadow-slate-950/20">
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-400">
+                Delivery status
+              </p>
+              <div className="mt-6 space-y-4">
+                {["pending", "processing", "shipped", "delivered"].map(
+                  (status, index) => {
+                    const active =
+                      ["pending", "processing", "shipped", "delivered"].indexOf(
+                        deliveryStatus,
+                      ) >= index;
+                    return (
+                      <div key={status} className="flex items-center gap-3">
+                        <span
+                          className={`h-3 w-3 rounded-full ${active ? "bg-emerald-400" : "bg-slate-600"}`}
+                        />
+                        <span
+                          className={active ? "text-white" : "text-slate-500"}
+                        >
+                          {status[0].toUpperCase() + status.slice(1)}
+                        </span>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+              <p className="mt-5 text-sm leading-6 text-slate-400">
+                Your order moves from payment confirmation to processing,
+                shipment, and final delivery.
+              </p>
+            </div>
             <div className="rounded-4xl border border-white/10 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20">
               <p className="text-sm uppercase tracking-[0.24em] text-slate-400">
                 Included providers

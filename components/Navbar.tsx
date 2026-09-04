@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Navbar() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function Navbar() {
       mounted = false;
       try {
         listener?.subscription?.unsubscribe();
-      } catch (e) {
+      } catch {
         // ignore
       }
     };
@@ -55,20 +56,12 @@ export default function Navbar() {
             Home
           </Link>
 
-          <Link href="/auctions" className="hover:text-white">
-            Auctions
-          </Link>
-
           <Link href="/dashboard" className="hover:text-white">
             Dashboard
           </Link>
 
           <Link href="/checkout" className="hover:text-white">
             Checkout
-          </Link>
-
-          <Link href="/create-auction" className="hover:text-white">
-            Create auction
           </Link>
 
           <Link href="/auctions" className="hover:text-white">

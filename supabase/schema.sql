@@ -170,6 +170,38 @@ create table orders (
   constraint fk_orders_user foreign key (user_id) references users(id)
 );
 
+-- Delivery tracking
+create type delivery_status as enum ('PENDING', 'PROCESSING', 'SHIPPED', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED', 'EXCEPTION');
+
+create table delivery_shipments (
+  id text primary key default gen_random_uuid(),
+  order_id text not null unique,
+  carrier text,
+  tracking_number text unique,
+  status delivery_status not null default 'PENDING',
+  estimated_delivery date,
+  shipped_at timestamptz,
+  delivered_at timestamptz,
+  last_location text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint fk_delivery_shipments_order foreign key (order_id) references orders(id) on delete cascade
+);
+create index on delivery_shipments(status);
+create index on delivery_shipments(estimated_delivery);
+
+create table delivery_events (
+  id text primary key default gen_random_uuid(),
+  shipment_id text not null,
+  status delivery_status not null,
+  location text,
+  description text not null,
+  occurred_at timestamptz not null default now(),
+  constraint fk_delivery_events_shipment foreign key (shipment_id) references delivery_shipments(id) on delete cascade
+);
+create index on delivery_events(shipment_id, occurred_at desc);
+
 create table order_items (
   id text primary key default gen_random_uuid(),
   order_id text not null,
@@ -263,3 +295,4 @@ create trigger users_updated_at before update on users for each row execute func
 create trigger products_updated_at before update on products for each row execute function set_updated_at_timestamp();
 create trigger carts_updated_at before update on carts for each row execute function set_updated_at_timestamp();
 create trigger orders_updated_at before update on orders for each row execute function set_updated_at_timestamp();
+create trigger delivery_shipments_updated_at before update on delivery_shipments for each row execute function set_updated_at_timestamp();

@@ -53,10 +53,10 @@ export function createPaymentRequest({
 
   if (normalizedProvider === "esewa") {
     const merchantCode = process.env.ESEWA_MERCHANT_CODE;
-    const hasConfiguredMerchant = Boolean(merchantCode && merchantCode.trim());
+    const configuredMerchantCode = merchantCode?.trim();
     const hasPublicCallback = !/localhost|127\.0\.0\.1/i.test(baseUrl);
 
-    if (!hasConfiguredMerchant || !hasPublicCallback) {
+    if (!configuredMerchantCode || !hasPublicCallback) {
       throw new Error(
         "eSewa is not configured for this environment. Set ESEWA_MERCHANT_CODE and a public NEXT_PUBLIC_APP_URL (not localhost) before using the live gateway.",
       );
@@ -69,7 +69,7 @@ export function createPaymentRequest({
       txAmt: "0",
       tAmt: amount.toFixed(2),
       pid: paymentId,
-      scd: merchantCode,
+      scd: configuredMerchantCode,
       su: returnUrl,
       fu: cancelUrl,
     };

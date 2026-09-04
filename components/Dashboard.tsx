@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
+import Navbar from "./Navbar";
 
 export default function Dashboard() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -27,11 +26,6 @@ export default function Dashboard() {
     loadUser();
   }, [router]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.replace("/login");
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
@@ -42,25 +36,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-white/10 bg-slate-900/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-tight text-white"
-          >
-            TechMart
-          </Link>
-          <div className="flex items-center gap-3 text-sm text-slate-300">
-            <span>Welcome{userEmail ? `, ${userEmail}` : ""}</span>
-            <button
-              onClick={handleSignOut}
-              className="rounded-full bg-white px-4 py-2 text-slate-950 font-semibold transition hover:bg-slate-200"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
         <div className="space-y-4">
@@ -71,7 +47,8 @@ export default function Dashboard() {
             Your seller dashboard
           </h1>
           <p className="max-w-2xl text-base leading-7 text-slate-300">
-            Manage auctions, view orders, and track performance from one place.
+            Welcome{userEmail ? `, ${userEmail}` : ""}. Manage auctions, view
+            orders, and track delivery from one place.
           </p>
         </div>
 
@@ -154,6 +131,44 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-lg shadow-slate-950/20">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-sky-300">
+                Delivery report
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-white">
+                Track your latest order
+              </h2>
+            </div>
+            <span className="rounded-full bg-amber-400/10 px-3 py-1 text-sm font-semibold text-amber-200">
+              Processing
+            </span>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-4">
+            {["Payment confirmed", "Preparing", "Shipped", "Delivered"].map(
+              (step, index) => (
+                <div key={step} className="relative">
+                  <div
+                    className={`h-2 rounded-full ${index < 2 ? "bg-emerald-400" : "bg-slate-700"}`}
+                  />
+                  <p
+                    className={`mt-3 text-sm ${index < 2 ? "text-white" : "text-slate-500"}`}
+                  >
+                    {step}
+                  </p>
+                  {index < 3 ? (
+                    <span className="absolute right-0 top-0 hidden h-2 w-2 translate-x-1 rounded-full bg-slate-950 sm:block" />
+                  ) : null}
+                </div>
+              ),
+            )}
+          </div>
+          <p className="mt-6 text-sm text-slate-400">
+            Estimated delivery: within 2-4 business days after dispatch.
+          </p>
         </section>
       </main>
     </div>

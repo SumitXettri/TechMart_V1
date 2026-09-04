@@ -346,7 +346,7 @@ function AuctionPageContent() {
                         step="1"
                         value={bidAmount}
                         onChange={(e) => setBidAmount(e.target.value)}
-                        className="mt-2 w-full rounded border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+                        className="mt-2 w-full rounded border border-slate-700 bg-slate-50 px-4 py-3 text-white"
                       />
                     </label>
 
